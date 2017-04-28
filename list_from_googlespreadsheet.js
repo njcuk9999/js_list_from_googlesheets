@@ -13,7 +13,7 @@ function matrix(rows, cols, defaultValue){
       }
   }
 return arr;
-}
+};
 
 // function to parse JSON data into 2D array (as in googlesheets)
 function parse_googlesheet(data) {
@@ -41,7 +41,7 @@ function parse_googlesheet(data) {
     d.columns[key] = values;
   }
   return d;
-}
+};
 
 // function to define python-like mask for a column
 function define_filter(column, query) {
@@ -51,7 +51,7 @@ function define_filter(column, query) {
     mask[i] = cond;
   }
   return mask;
-}
+};
 
 // function to apply python-like mask to column (mask.length === column.length)
 function apply_filter(column, mask) {
@@ -66,7 +66,7 @@ function apply_filter(column, mask) {
     }
   }
   return fcolumn;
-}
+};
 
 // function to filter full data set (using define_filter and apply_filter)
 function data_filter(data, column, query) {
@@ -78,81 +78,110 @@ function data_filter(data, column, query) {
     newdata.columns[key] = newvalues;
   }
   return newdata;
-}
+};
 
-
+// ---------------------------------------------------------
+// Define URL variables
+// ---------------------------------------------------------
 // The URL to the google sheet
 var start = "https://spreadsheets.google.com/feeds/cells/";
-var key = "12W99mv2eN0ZX2P1t6jP3_oZUL2JF5BJqL5BI7CVVdfU";
+var defaultKey = "12W99mv2eN0ZX2P1t6jP3_oZUL2JF5BJqL5BI7CVVdfU";
 var end= "/od6/public/values?alt=json";
-var url = start + key + end;
-
+// ---------------------------------------------------------
+// Define html to add
+// ---------------------------------------------------------
 // html that comes before list items (in this order)
 var pre1 = "<div class=\"w3-container w3-text-black w3-large\">";
 var sectionTitle = "";
 var pre2 = "</div><div class=\"w3-container w3-text-grey\" id=\"text\"><ul>";
 // html that forms the list items (in this order)
-var listHtml1 = "<li><a target=\"";
-var listHtml2 = "\" href=\"";
-var listHtml3 = "\">";
-var listHtml4 = "</a><br></li>";
+var listHtml1 = "<li>"
+var listHtml2 = "<a target=\"";
+var listHtml3 = "\" href=\"";
+var listHtml4 = "\">";
+var listHtml5 = "</a>";
+var listNote1 = "<div class=\"w3-container w3-text-brown w3-small\""
+var listNote2 = " id=\"text\">"
+var listNote3 = "</div>"
+var listHtml6 = "</li>";
 // html that comes after the list items
 var post = "</ul></div>";
-
-// function makeList(tag) {
-
-
-
-// function expects data.feed.entry
-// where entry is an array of objects with each object having
-// object.title.$t   and    object.content.$t
-
-
-function makeList(id, querytag){
-
+// ---------------------------------------------------------
+// function to make the data list
+// ---------------------------------------------------------
+function makeList(key){
+  var mydata = [];
+  // If key is none use the default (provided here)
+  if (key == "None") {
+    key = defaultKey;
+  }
+  // Construct URL
+  var url = start + key + end;
+  console.log("Getting JSON with query: " + url);
   // JSON query
-  $.getJSON(url, function() {console.log("success");})
-    .done(function(data){
-      // load data into array
-      data = parse_googlesheet(data);
-
+  $.ajax({
+  dataType: "json",
+  url: url,
+  async: false,
+  success: function(data) {
+    console.log("JSON Query Successful");
+    // load data into array
+    mydata = parse_googlesheet(data);
+    }
+  });
+  // return array version of spreadsheet
+  return mydata;
+}
+// ---------------------------------------------------------
+// function to filter the data list
+// ---------------------------------------------------------
+function filterList(querytag, d){
       // filter data
-      data = data_filter(data, data.columns.tag, querytag);
+      data = data_filter(d, d.columns.tag, querytag);
       
-      if (data.columns.tag.length > 1) {
+      if (data.columns.tag.length > 0) {
         // populate arrays
         var tag = data.columns.tag;
         var sections = data.columns.section;
         var targets = data.columns.listtarget;
         var descriptions = data.columns.desc;
         var urls = data.columns.listurl;
+        var notes = data.columns.notes;
         // Create output from pre html
-        output = pre1 + sections[0] + pre2;
-
+        output = pre1 + sections[0] + ":" + pre2;
         // Append list items to output
         for (var i=0; i < tag.length; i++)
         {
-          output += listHtml1 + targets[i];
-          output += listHtml2 + urls[i];
-          output += listHtml3 + descriptions[i];
-          output += listHtml4;
+          // add the html for list item
+          output += listHtml1;
+          // if we have a url add it
+          if (urls[i] != "None") {
+            output += listHtml2 + targets[i];
+            output += listHtml3 + urls[i];
+            output += listHtml4 + descriptions[i] + listHtml5;
+          } else {
+            output += descriptions[i];
+          }
+          // If we have a note add it
+          if (notes[i] != "None") {
+            output += listNote1 + listNote2
+            output += notes[i] + listNote3
+          }
+          // add the end of the list item
+          output += listHtml6;
         }
         // add post html to output
         output += post;
         // return output
-        document.getElementById(id).innerHTML = output;
+        document.getElementById(querytag).innerHTML = output;
       } else {
         console.log("No rows --> no list")
       }
+}
 
-      // return output
-      })
-    .fail(function() {
-      console.log( "getJSON error");
-      });
-    }
-
-
-var querytag = "home-poster";
-var id = "location display";
-makeList(id, querytag);
+// ---------------------------------------------------------
+// To run the code (done from html page)
+// ---------------------------------------------------------
+// makeList("None");
+// var id = "home-most-recent-pub";
+// filterList(id);
