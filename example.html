@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Location test</title>
+</head>
+<body>
+
+  <!-- Requires jquery and the list_from_googlespreadsheet.js -->
+  <script src="jquery-1.12.3.js"></script>
+  <script type="text/javascript" src="list_from_googlespreadsheet.js"></script>
+  
+  <!-- Load the spreadsheet once per page -->
+  <script type="text/javascript">
+    var thedatatable = [];
+    var spreadsheetkey = "12W99mv2eN0ZX2P1t6jP3_oZUL2JF5BJqL5BI7CVVdfU";
+    thedatatable = makeList(spreadsheetkey);
+  </script>
+  
+  <!-- List 1 -->
+  <p id="item-key1">	List loading... Please wait  </p>
+  
+  <1-- Get all items in spread sheet and create list in <p> with id="item-key1" -->
+  <script type="text/javascript">
+    var id = "item-key1";
+    filterList(id, thedatatable);
+  </script>
+  
+  <!-- List 2 -->
+  <p id="item-key2">	List loading... Please wait  </p>
+  
+  <!-- Get all items in spread sheet and create list in <p> with id="item-key2" -->
+  <script type="text/javascript">
+    var id = "item-key2";
+    filterList(id, thedatatable);
+  </script>
+  
+
+</body>
+</html>
