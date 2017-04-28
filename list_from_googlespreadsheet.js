@@ -1,4 +1,18 @@
+// List from google sheets
+// Author: Neil Cook
+// Google sheets must have a column with title "tag"
+// This tag is used as a filter so one google spreadsheet can be used for many lists
+// each list is created from <p id="tag"></p>
+
+// To get the spreadsheet run the following:
+//        makeList("None");
+// To make a list from <p id="tag"></p>run the following:
+//        var id = "home-most-recent-pub";
+//        filterList(id);
+
+// ---------------------------------------------------------
 // function to build matrix (2D array)
+// ---------------------------------------------------------
 function matrix(rows, cols, defaultValue){
   var arr = [];
   // Creates all lines:
@@ -15,7 +29,9 @@ function matrix(rows, cols, defaultValue){
 return arr;
 };
 
+// ---------------------------------------------------------
 // function to parse JSON data into 2D array (as in googlesheets)
+// ---------------------------------------------------------
 function parse_googlesheet(data) {
   var entries = data.feed.entry;
   
@@ -43,7 +59,9 @@ function parse_googlesheet(data) {
   return d;
 };
 
+// ---------------------------------------------------------
 // function to define python-like mask for a column
+// ---------------------------------------------------------
 function define_filter(column, query) {
   var mask = new Array(column.length);
   for (var i=0; i < column.length; i++) {
@@ -53,7 +71,9 @@ function define_filter(column, query) {
   return mask;
 };
 
+// ---------------------------------------------------------
 // function to apply python-like mask to column (mask.length === column.length)
+// ---------------------------------------------------------
 function apply_filter(column, mask) {
   if (column.length > mask.length) {
     console.log("Error: Mask too short for column");
@@ -68,7 +88,9 @@ function apply_filter(column, mask) {
   return fcolumn;
 };
 
+// ---------------------------------------------------------
 // function to filter full data set (using define_filter and apply_filter)
+// ---------------------------------------------------------
 function data_filter(data, column, query) {
   var mask = define_filter(column, query);
   var newdata = [];
